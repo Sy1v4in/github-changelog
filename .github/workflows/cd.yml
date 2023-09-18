@@ -23,4 +23,4 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: fraisse/changelog:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/github-changelog:latest
