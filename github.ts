@@ -53,8 +53,8 @@ const generateMarkdownReport = (repository: Repository, pullRequests: PullReques
 }
 
 const generateSlackReport = (repository: Repository, pullRequests: PullRequest[]): string => {
-  const prList = pullRequests.map(pr => `• [<${pr.url} | #${pr.number}>] ${pr.title}`).join('\\n')
-  return `*${repository.repo}*\\n${prList}\n`
+  const prList = pullRequests.map(pr => `• [<${pr.url} | #${pr.number}>] ${pr.title}`).join('\n')
+  return `*${repository.repo}*\n${prList}\n`
 }
 
 const pullRequestsForTag = async (repository: Repository, tag: string): Promise<PullRequest[]> => {
