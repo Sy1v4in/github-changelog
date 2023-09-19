@@ -52,6 +52,11 @@ const generateMarkdownReport = (repository: Repository, pullRequests: PullReques
   return `*${repository.repo}*\n${prList}\n`
 }
 
+const generateSlackReport = (repository: Repository, pullRequests: PullRequest[]): string => {
+  const prList = pullRequests.map(pr => `• [<${pr.url} | #${pr.number}>] ${pr.title}`).join('\\n')
+  return `*${repository.repo}*\\n${prList}\n`
+}
+
 const pullRequestsForTag = async (repository: Repository, tag: string): Promise<PullRequest[]> => {
   const previousTag = await getPreviousTag(repository, tag)
   const commitsBetweenTwoTags = await getCommitsBetweenTwoTags(repository, tag, previousTag)
@@ -61,4 +66,4 @@ const pullRequestsForTag = async (repository: Repository, tag: string): Promise<
 const pullRequestsForSha = async (repository: Repository, sha: string): Promise<PullRequest[]> =>
   getPullRequestsAssociatedWith(repository, [sha])
 
-export { generateMarkdownReport, pullRequestsForSha, pullRequestsForTag }
+export { generateMarkdownReport, generateSlackReport, pullRequestsForSha, pullRequestsForTag }
