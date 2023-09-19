@@ -1,5 +1,6 @@
+#!/usr/bin/env bun
 import { Command } from 'commander'
-import { generateReportForSha, generateReportForTag, Repository } from './github.ts'
+import { pullRequestsForSha, pullRequestsForTag, generateSlackReport, type Repository } from './github'
 
 const parseRepository = (spec: string): Repository => {
   const [owner, ...repositoryName] = spec.split('/')
@@ -19,7 +20,8 @@ program
   .argument('<tag>', 'the tag from which the pull requests are expected')
   .argument('<repo>', 'the github repository where the pull requests are requested (<owner>/<name>)', parseRepository)
   .action(async (tag, repo) => {
-    const report = await generateReportForTag(repo, tag)
+    const pullRequests = await pullRequestsForTag(repo, tag)
+    const report = generateSlackReport(repo, pullRequests)
     console.log(report)
   })
 
@@ -29,7 +31,8 @@ program
   .argument('<sha>', 'commit sha from which the pull request is expected')
   .argument('<repo>', 'the github repository where the pull request is requested (<owner>/<name>)', parseRepository)
   .action(async (sha, repo) => {
-    const report = await generateReportForSha(repo, sha)
+    const pullRequests = await pullRequestsForSha(repo, sha)
+    const report = generateSlackReport(repo, pullRequests)
     console.log(report)
   })
 
