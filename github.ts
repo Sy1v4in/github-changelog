@@ -47,21 +47,18 @@ const getPullRequestsAssociatedWith = async (repo: Repository, commits: string[]
     .map(pr => ({ number: pr.number, title: pr.title, url: pr.html_url }))
 }
 
-const generateReport = (repository: Repository, pullRequests: PullRequest[]): string => {
+const generateMarkdownReport = (repository: Repository, pullRequests: PullRequest[]): string => {
   const prList = pullRequests.map(pr => `• [[#${pr.number}](${pr.url})] ${pr.title}`).join('\n')
   return `*${repository.repo}*\n${prList}\n`
 }
 
-const generateReportForTag = async (repository: Repository, tag: string): Promise<string> => {
+const pullRequestsForTag = async (repository: Repository, tag: string): Promise<PullRequest[]> => {
   const previousTag = await getPreviousTag(repository, tag)
   const commitsBetweenTwoTags = await getCommitsBetweenTwoTags(repository, tag, previousTag)
-  const pullRequests = await getPullRequestsAssociatedWith(repository, commitsBetweenTwoTags)
-  return generateReport(repository, pullRequests)
+  return getPullRequestsAssociatedWith(repository, commitsBetweenTwoTags)
 }
 
-const generateReportForSha = async (repository: Repository, sha: string): Promise<string> => {
-  const pullRequests = await getPullRequestsAssociatedWith(repository, [sha])
-  return generateReport(repository, pullRequests)
-}
+const pullRequestsForSha = async (repository: Repository, sha: string): Promise<PullRequest[]> =>
+  getPullRequestsAssociatedWith(repository, [sha])
 
-export { generateReportForSha, generateReportForTag }
+export { generateMarkdownReport, pullRequestsForSha, pullRequestsForTag }
