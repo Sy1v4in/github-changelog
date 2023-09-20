@@ -15,8 +15,8 @@ export type PullRequest = Readonly<{
 }>
 
 const STYLES = {
-  markdown: '*<%= it.repository.repo %>*\n<% it.pullRequests.forEach(pr => { %>• [[#<%= pr.number %>](<%= pr.url %>)] <%= pr.title %><%}) %>',
-  slack: '*<%= it.repository.repo %>*\n<% it.pullRequests.forEach(pr => { %>  - [<<%= pr.url %> | #<%= pr.number %>>] <%= pr.title %><%}) %>'
+  markdown: '*<%= it.repository.repo %>*\n<% it.pullRequests.forEach(pr => { %>• [[#<%= pr.number %>](<%= pr.url %>)] <%= pr.title %> \n<%}) %>',
+  slack: '*<%= it.repository.repo %>*\n<% it.pullRequests.forEach(pr => { %>  - [<<%= pr.url %> | #<%= pr.number %>>] <%= pr.title %> \n<%}) %>'
 }
 
 export type ReportStyle = keyof typeof STYLES
