@@ -1,4 +1,5 @@
 import { Octokit } from 'octokit'
+import { Eta } from 'eta'
 
 const octokit = new Octokit({ auth: process.env.GH_TOKEN })
 
@@ -7,11 +8,20 @@ export type Repository = Readonly<{
   repo: string
 }>
 
-type PullRequest = Readonly<{
+export type PullRequest = Readonly<{
   number: number
   title: string
   url: string
 }>
+
+const STYLES = {
+  markdown: '*<%= it.repository.repo %>*\n<% it.pullRequests.forEach(pr => { %>• [[#<%= pr.number %>](<%= pr.url %>)] <%= pr.title %><%}) %>',
+  slack: '*<%= it.repository.repo %>*\n<% it.pullRequests.forEach(pr => { %>  - [<<%= pr.url %> | #<%= pr.number %>>] <%= pr.title %><%}) %>'
+}
+
+export type ReportStyle = keyof typeof STYLES
+
+const isReportStyle = (style: string): style is ReportStyle => Object.keys(STYLES).includes(style)
 
 const getPreviousTag = async (repository: Repository, referenceTag: string): Promise<string> => {
   const tags = await listTags(repository)
@@ -47,23 +57,16 @@ const getPullRequestsAssociatedWith = async (repo: Repository, commits: string[]
     .map(pr => ({ number: pr.number, title: pr.title, url: pr.html_url }))
 }
 
-const generateMarkdownReport = (repository: Repository, pullRequests: PullRequest[]): string => {
-  const prList = pullRequests.map(pr => `• [[#${pr.number}](${pr.url})] ${pr.title}`).join('\n')
-  return `*${repository.repo}*\n${prList}\n`
-}
-
-const generateSlackReport = (repository: Repository, pullRequests: PullRequest[]): string => {
-  const prList = pullRequests.map(pr => `• [<${pr.url} | #${pr.number}>] ${pr.title}`).join('\n')
-  return `*${repository.repo}*\n${prList}\n`
-}
-
 const pullRequestsForTag = async (repository: Repository, tag: string): Promise<PullRequest[]> => {
   const previousTag = await getPreviousTag(repository, tag)
   const commitsBetweenTwoTags = await getCommitsBetweenTwoTags(repository, tag, previousTag)
-  return getPullRequestsAssociatedWith(repository, commitsBetweenTwoTags)
+  return await getPullRequestsAssociatedWith(repository, commitsBetweenTwoTags)
 }
 
 const pullRequestsForSha = async (repository: Repository, sha: string): Promise<PullRequest[]> =>
-  getPullRequestsAssociatedWith(repository, [sha])
+  await getPullRequestsAssociatedWith(repository, [sha])
 
-export { generateMarkdownReport, generateSlackReport, pullRequestsForSha, pullRequestsForTag }
+const generateReport = (repository: Repository, pullRequests: PullRequest[], style: ReportStyle): string =>
+  new Eta().renderString(STYLES[style], { repository, pullRequests })
+
+export { generateReport, isReportStyle, pullRequestsForSha, pullRequestsForTag }
