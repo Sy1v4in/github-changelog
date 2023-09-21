@@ -8,4 +8,4 @@ COPY . .
 
 ENV NODE_ENV production
 
-ENTRYPOINT [ "bun", "changelog.ts" ]
+ENTRYPOINT [ "bun", "index.ts" ]

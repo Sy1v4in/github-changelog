@@ -1,5 +1,4 @@
 import { Octokit } from 'octokit'
-import { Eta } from 'eta'
 
 const octokit = new Octokit({ auth: process.env.GH_TOKEN })
 
@@ -13,15 +12,6 @@ export type PullRequest = Readonly<{
   title: string
   url: string
 }>
-
-const STYLES = {
-  markdown: '*<%= it.repository.repo %>*\n<% it.pullRequests.forEach(pr => { %>• [[#<%= pr.number %>](<%= pr.url %>)] <%= pr.title %> \n<%}) %>',
-  slack: '*<%= it.repository.repo %>*\n<% it.pullRequests.forEach(pr => { %>  - [<<%= pr.url %> | #<%= pr.number %>>] <%= pr.title %> \n<%}) %>'
-}
-
-export type ReportStyle = keyof typeof STYLES
-
-const isReportStyle = (style: string): style is ReportStyle => Object.keys(STYLES).includes(style)
 
 const getPreviousTag = async (repository: Repository, referenceTag: string): Promise<string> => {
   const tags = await listTags(repository)
@@ -66,7 +56,4 @@ const pullRequestsForTag = async (repository: Repository, tag: string): Promise<
 const pullRequestsForSha = async (repository: Repository, sha: string): Promise<PullRequest[]> =>
   await getPullRequestsAssociatedWith(repository, [sha])
 
-const generateReport = (repository: Repository, pullRequests: PullRequest[], style: ReportStyle): string =>
-  new Eta().renderString(STYLES[style], { repository, pullRequests })
-
-export { generateReport, isReportStyle, pullRequestsForSha, pullRequestsForTag }
+export { pullRequestsForSha, pullRequestsForTag }
