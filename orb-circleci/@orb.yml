@@ -1,0 +1,7 @@
+version: 2.1
+
+description: >
+  Create and notify a changelog in a slack channel
+
+orbs:
+  slack: circleci/slack@4.12.5
