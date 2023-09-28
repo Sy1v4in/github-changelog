@@ -1,0 +1,46 @@
+version: 2.1
+
+orbs:
+  orb-tools: circleci/orb-tools@12.0.4
+
+workflows:
+  build_and_publish:
+    jobs:
+      # Lint your YAML
+      - orb-tools/lint:
+          source_dir: orb-circleci
+
+      # Pack the orb into a single file and validate the result.
+      - orb-tools/pack:
+          filters:
+            tags:
+              only: /.*/
+          source_dir: orb-circleci
+
+      # release dev version of orb, for testing & possible publishing.
+      # orb will be published as dev:alpha and dev:${CIRCLE_SHA1:0:7}.
+      # requires a CircleCI API token to be stored as CIRCLE_TOKEN (default)
+      # https://circleci.com/docs/2.0/managing-api-tokens
+      # store CIRCLE_TOKEN as a project env var or Contexts resource
+      # if using Contexts, add your context below
+      - orb-tools/publish:
+          pub_type: dev
+          orb_name: fraisse/changelog
+          vcs_type: github
+          requires:
+            - orb-tools/lint
+            - orb-tools/pack
+
+      # release with a semver git tag
+      - orb-tools/publish:
+          pub_type: production
+          vcs_type: github
+          orb_name: fraisse/changelog
+          requires:
+            - orb-tools/lint
+            - orb-tools/pack
+          filters:
+            tags:
+              only: /v[0-9]+\.[0-9]+\.[0-9]+/
+            branches:
+              ignore: /.*/
